@@ -9,17 +9,20 @@ protocol PrimeGenerator {
 // Prime sieve from the interwebs
 class FunctionalSieve: PrimeGenerator {
     func primesUpTo(max: UInt) -> [UInt] {
-        return [1] + sieve(Array(2...max))
+        var primes: [UInt] = []
+        for n in 2...max {
+            var isPrime = true
+            for prime in primes {
+                if n % prime == 0 {
+                    isPrime = false
+                    break
+                }
+            }
+            if isPrime { primes.append(n) }
+        }
+        return [1] + primes
     }
 
-    /// @param numbers must be an array of sequential numbers, not smaller than 2
-    private func sieve(numbers: [UInt]) -> [UInt] {
-        if numbers.isEmpty { return [] }
-        let p = numbers[0]
-        assert(p > 1, "numbers must start at 2 or higher")
-        let rest = numbers[1..<numbers.count]
-        return [p] + sieve(rest.filter { $0 % p > 0 })
-    }
 
 }
 
@@ -49,7 +52,11 @@ class PrimesDataSource: NSObject, UITableViewDataSource {
     }
 
     func refresh() {
-        self.primes = FunctionalSieve().primesUpTo(50000)
-        self.didFinishGeneratingPrimes?()
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0)) {
+            self.primes = FunctionalSieve().primesUpTo(5000)
+            dispatch_async(dispatch_get_main_queue()) {
+                self.didFinishGeneratingPrimes?()
+            }
+        }
     }
 }
