@@ -13,18 +13,15 @@ class MasterViewController: UITableViewController {
             let controllers = split.viewControllers
             self.detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
         }
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Refresh, target: self, action: "refresh")
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: activityIndicator)
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Refresh, target: self, action: #selector(refresh))
 
-        tableView.dataSource = dataSource
-        activityIndicator.hidesWhenStopped = true
         dataSource.didFinishGeneratingPrimes = {
             self.activityIndicator.stopAnimating()
             self.tableView.reloadData()
         }
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: activityIndicator)
-
-        refresh()
-
+        tableView.dataSource = dataSource
     }
 
     override func viewWillAppear(animated: Bool) {
